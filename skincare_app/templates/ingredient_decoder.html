@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Ingredient Decoder{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-search me-1"></i> Ingredient Analysis</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Ingredient Decoder</h1>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Paste your product's ingredient list and we'll analyze each ingredient for purpose, safety, and skin compatibility.</p>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <form method="POST" class="glass-card p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium"><i class="bi bi-list-ul me-2"></i>Paste Ingredients</label>
+                        <textarea name="ingredients" class="form-control" rows="5" placeholder="Paste ingredient list here, separated by commas or new lines&#10;&#10;Example: Niacinamide, Hyaluronic Acid, Retinol, Vitamin C, Salicylic Acid, Ceramides">{{ raw_text }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5">
+                        <i class="bi bi-search me-2"></i>Decode Ingredients
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if conflicts %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="alert alert-danger border-0 shadow-sm rounded-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-exclamation-octagon me-2"></i>Ingredient Conflicts Detected!</h4>
+                    {% for c in conflicts %}
+                    <div class="conflict-item p-3 rounded-3 mb-2 bg-white bg-opacity-50">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge bg-{{ 'danger' if c.severity == 'high' else 'warning text-dark' if c.severity == 'medium' else 'info' }} me-2">{{ c.severity | upper }}</span>
+                            <strong>{{ c.ingredients | join(' + ') | title }}</strong>
+                        </div>
+                        <p class="mb-0 small">{{ c.message }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if found %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4"><i class="bi bi-check-circle text-success me-2"></i>Identified Ingredients ({{ found | length }})</h3>
+            <div class="row g-4">
+                {% for ing in found %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="ingredient-card glass-card h-100 p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-semibold mb-0">{{ ing.name }}</h5>
+                            <span class="badge bg-{{ 'success' if ing.rating >= 4 else 'warning text-dark' if ing.rating >= 3 else 'secondary' }}">
+                                {{ ing.rating }}/5
+                            </span>
+                        </div>
+                        <span class="badge bg-primary-soft mb-2">{{ ing.category }}</span>
+                        <p class="small mb-2"><strong>Purpose:</strong> {{ ing.purpose }}</p>
+                        <p class="small mb-2"><strong>Safety:</strong> {{ ing.safety }}</p>
+                        <div class="mb-2">
+                            <strong class="small">Best for:</strong>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                {% for b in ing.best_for %}
+                                <span class="badge bg-accent-soft text-dark">{{ b }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if ing.warnings %}
+                        <div class="mt-2">
+                            <strong class="small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Warnings:</strong>
+                            <ul class="small mb-0 mt-1">
+                                {% for w in ing.warnings %}
+                                <li>{{ w }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not_found %}
+        <div>
+            <h3 class="fw-bold mb-4"><i class="bi bi-question-circle text-muted me-2"></i>Unrecognized Ingredients ({{ not_found | length }})</h3>
+            <div class="row g-3">
+                {% for ing in not_found %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="glass-card p-3 h-100 border-start border-3 border-secondary">
+                        <h6 class="fw-semibold">{{ ing.name }}</h6>
+                        <p class="small text-muted mb-0">{{ ing.purpose }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

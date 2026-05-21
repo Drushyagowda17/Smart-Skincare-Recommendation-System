@@ -1,0 +1,24 @@
+# Python environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Databases
+skincare_app/*.db
+skincare_app/*.db-journal
+skincare_app/*.db-wal
+
+# Uploads
+skincare_app/static/uploads/progress/*
+!skincare_app/static/uploads/progress/.gitkeep
+
+# IDEs & System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

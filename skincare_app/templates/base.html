@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Skincare Recommendation System - Personalized skincare routines, ingredient analysis, and expert consultations">
+    <title>{% block title %}Smart Skincare{% endblock %} | GlowGuide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-xl fixed-top glass-navbar" id="mainNavbar">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('index') }}">
+                <span class="brand-icon me-2"><i class="bi bi-droplet-fill"></i></span>
+                <span class="brand-text">Glow<span class="text-accent">Guide</span></span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}"><i class="bi bi-house-heart me-1"></i>Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#quiz"><i class="bi bi-clipboard2-pulse me-1"></i>Quiz</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-tools me-1"></i>Tools</a>
+                        <ul class="dropdown-menu glass-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('ingredient_decoder') }}"><i class="bi bi-search me-2"></i>Ingredient Decoder</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('routine_builder') }}"><i class="bi bi-calendar3 me-2"></i>Routine Builder</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('compare') }}"><i class="bi bi-arrow-left-right me-2"></i>Compare Products</a></li>
+                            {% if session.get('user_id') %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('progress') }}"><i class="bi bi-camera me-2"></i>Progress Tracker</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('skin_diary') }}"><i class="bi bi-journal-text me-2"></i>Skin Diary</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-book me-1"></i>Learn</a>
+                        <ul class="dropdown-menu glass-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('myths') }}"><i class="bi bi-lightbulb me-2"></i>Myths vs Facts</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ayurveda') }}"><i class="bi bi-flower1 me-2"></i>Ayurveda Guide</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('hyperpigmentation') }}"><i class="bi bi-sun me-2"></i>Hyperpigmentation</a></li>
+                        </ul>
+                    </li>
+                    {% if session.get('user_id') %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('consult') }}"><i class="bi bi-chat-dots me-1"></i>Consult</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('saved_routines') }}"><i class="bi bi-bookmark-heart me-1"></i>Saved</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin') }}"><i class="bi bi-speedometer2 me-1"></i>Admin</a></li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2">
+                        <button class="btn btn-sm btn-icon theme-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="themeToggle">
+                            <i class="bi bi-moon-stars-fill"></i>
+                        </button>
+                    </li>
+                    {% if session.get('doctor_id') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                            <span class="avatar-sm bg-info me-2"><i class="bi bi-heart-pulse"></i></span>
+                            <span class="d-none d-lg-inline">Dr. {{ session.get('doctor_name', '').split(' ')[-1] }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('doctor_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('doctor_patients') }}"><i class="bi bi-people me-2"></i>Patients</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('doctor_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    {% elif session.get('user_id') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                            <span class="avatar-sm me-2"><i class="bi bi-person-circle"></i></span>
+                            <span class="d-none d-lg-inline">{{ session.get('username') }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('saved_routines') }}"><i class="bi bi-bookmark me-2"></i>Saved Routines</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('skin_diary') }}"><i class="bi bi-journal me-2"></i>Skin Diary</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('progress') }}"><i class="bi bi-graph-up me-2"></i>Progress</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a></li>
+                    <li class="nav-item ms-2"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ url_for('register') }}">Sign Up</a></li>
+                    <li class="nav-item ms-2"><a class="nav-link small text-muted" href="{{ url_for('doctor_login') }}"><i class="bi bi-heart-pulse me-1"></i>Doctor</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container-fluid px-3 px-lg-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;margin-top:80px;">
+                {% for category, message in messages %}
+                <div class="toast show align-items-center text-white bg-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' if category == 'info' else 'warning' }} border-0 mb-2" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'danger' else 'info-circle' }} me-2"></i>
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-droplet-fill me-2 text-primary"></i>GlowGuide</h5>
+                    <p class="text-muted small">Your personalized skincare companion. Science-backed recommendations tailored to your unique skin profile.</p>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Tools</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="{{ url_for('index') }}#quiz" class="text-muted text-decoration-none">Skin Quiz</a></li>
+                        <li class="mb-2"><a href="{{ url_for('ingredient_decoder') }}" class="text-muted text-decoration-none">Ingredient Decoder</a></li>
+                        <li class="mb-2"><a href="{{ url_for('routine_builder') }}" class="text-muted text-decoration-none">Routine Builder</a></li>
+                        <li class="mb-2"><a href="{{ url_for('compare') }}" class="text-muted text-decoration-none">Compare</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Learn</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="{{ url_for('myths') }}" class="text-muted text-decoration-none">Myths vs Facts</a></li>
+                        <li class="mb-2"><a href="{{ url_for('ayurveda') }}" class="text-muted text-decoration-none">Ayurveda</a></li>
+                        <li class="mb-2"><a href="{{ url_for('hyperpigmentation') }}" class="text-muted text-decoration-none">Hyperpigmentation</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="fw-semibold mb-3">Disclaimer</h6>
+                    <p class="text-muted small">This platform provides general skincare guidance only. Always consult a qualified dermatologist for medical advice. Individual results may vary.</p>
+                </div>
+            </div>
+            <hr class="my-4 opacity-25">
+            <div class="text-center text-muted small">
+                <p class="mb-0">&copy; {{ now.year }} GlowGuide — Smart Skincare Recommendation System. Built with <i class="bi bi-heart-fill text-danger"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="fab-button" onclick="window.scrollTo({top:0,behavior:'smooth'})" id="fabTop" title="Back to Top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

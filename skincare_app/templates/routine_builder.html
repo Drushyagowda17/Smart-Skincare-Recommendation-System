@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Routine Builder{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-calendar3 me-1"></i> Build Your Routine</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Routine Builder</h1>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Drag and drop products to build your perfect AM &amp; PM skincare routine with proper layering order.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="glass-card p-4 sticky-top" style="top:100px;">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-bag me-2 text-primary"></i>Products</h4>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Search products..." id="productSearch" oninput="filterProducts()">
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" id="categoryFilter" onchange="filterProducts()">
+                            <option value="">All Categories</option>
+                            <option value="cleanser">Cleanser</option>
+                            <option value="toner">Toner</option>
+                            <option value="serum">Serum</option>
+                            <option value="moisturizer">Moisturizer</option>
+                            <option value="sunscreen">Sunscreen</option>
+                            <option value="exfoliant">Exfoliant</option>
+                        </select>
+                    </div>
+                    <div class="product-list" id="productList" style="max-height:500px;overflow-y:auto;">
+                        {% for product in products %}
+                        <div class="routine-product-item p-2 mb-2 rounded-3 border" data-category="{{ product['category'] }}" data-name="{{ product['name'] | lower }}" draggable="true" ondragstart="dragProduct(event, '{{ product['name'] }}', '{{ product['category'] }}')">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary-soft me-1">{{ product['category'] | title }}</span>
+                                    <strong class="small">{{ product['name'] }}</strong>
+                                </div>
+                                <small class="text-primary fw-bold">{{ format_price(product['price']) }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="routine-builder-zone glass-card p-4">
+                            <h4 class="fw-bold mb-3"><i class="bi bi-brightness-high text-warning me-2"></i>Morning (AM)</h4>
+                            <div class="routine-order text-muted small mb-3">
+                                <span class="badge bg-light text-dark me-1">1. Cleanser</span>
+                                <span class="badge bg-light text-dark me-1">2. Toner</span>
+                                <span class="badge bg-light text-dark me-1">3. Serum</span>
+                                <span class="badge bg-light text-dark me-1">4. Moisturizer</span>
+                                <span class="badge bg-light text-dark">5. Sunscreen</span>
+                            </div>
+                            <div class="drop-zone p-3 rounded-3 min-vh-25" id="amZone" ondrop="dropProduct(event, 'am')" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                                <p class="text-muted text-center small mb-0" id="amPlaceholder"><i class="bi bi-plus-circle me-1"></i>Drag products here</p>
+                            </div>
+                            <div class="mt-3">
+                                <h6 class="fw-semibold">Layering Tips:</h6>
+                                <ul class="small text-muted mb-0">
+                                    <li>Apply products from thinnest to thickest</li>
+                                    <li>Wait 1-2 min between active serums</li>
+                                    <li>Sunscreen is always the last step</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="routine-builder-zone glass-card p-4">
+                            <h4 class="fw-bold mb-3"><i class="bi bi-moon-stars text-primary me-2"></i>Night (PM)</h4>
+                            <div class="routine-order text-muted small mb-3">
+                                <span class="badge bg-light text-dark me-1">1. Cleanser</span>
+                                <span class="badge bg-light text-dark me-1">2. Toner</span>
+                                <span class="badge bg-light text-dark me-1">3. Exfoliant</span>
+                                <span class="badge bg-light text-dark me-1">4. Serum</span>
+                                <span class="badge bg-light text-dark">5. Moisturizer</span>
+                            </div>
+                            <div class="drop-zone p-3 rounded-3 min-vh-25" id="pmZone" ondrop="dropProduct(event, 'pm')" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                                <p class="text-muted text-center small mb-0" id="pmPlaceholder"><i class="bi bi-plus-circle me-1"></i>Drag products here</p>
+                            </div>
+                            <div class="mt-3">
+                                <h6 class="fw-semibold">Layering Tips:</h6>
+                                <ul class="small text-muted mb-0">
+                                    <li>No sunscreen needed at night</li>
+                                    <li>Actives like retinol go after toner</li>
+                                    <li>Wait 5 min after strong actives</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 mt-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Important Warnings</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-danger bg-opacity-10">
+                                <h6 class="fw-bold text-danger">Do NOT Mix:</h6>
+                                <ul class="small mb-0">
+                                    <li>Retinol + AHA/BHA (same routine)</li>
+                                    <li>Vitamin C + Strong acids</li>
+                                    <li>Multiple exfoliants at once</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-success bg-opacity-10">
+                                <h6 class="fw-bold text-success">Safe Combos:</h6>
+                                <ul class="small mb-0">
+                                    <li>Niacinamide + Hyaluronic Acid</li>
+                                    <li>Vitamin C + Vitamin E + Ferulic</li>
+                                    <li>Ceramides + Peptides</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterProducts() {
+    var search = document.getElementById('productSearch').value.toLowerCase();
+    var category = document.getElementById('categoryFilter').value;
+    var items = document.querySelectorAll('.routine-product-item');
+    items.forEach(function(item) {
+        var matchName = item.dataset.name.includes(search);
+        var matchCat = !category || item.dataset.category === category;
+        item.style.display = (matchName && matchCat) ? '' : 'none';
+    });
+}
+
+function dragProduct(e, name, category) {
+    e.dataTransfer.setData('text/plain', JSON.stringify({name: name, category: category}));
+}
+
+function dropProduct(e, zone) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    var data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    var zoneEl = document.getElementById(zone + 'Zone');
+    var placeholder = document.getElementById(zone + 'Placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+
+    var item = document.createElement('div');
+    item.className = 'dropped-product d-flex justify-content-between align-items-center p-2 mb-2 rounded-3 border border-primary bg-primary bg-opacity-10 animate-fade-in';
+    item.innerHTML = '<div><span class="badge bg-primary me-1">' + data.category.charAt(0).toUpperCase() + data.category.slice(1) + '</span><strong class="small">' + data.name + '</strong></div><button class="btn btn-sm btn-outline-danger rounded-circle" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>';
+    zoneEl.appendChild(item);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-1"><i class="bi bi-heart-pulse me-2 text-info"></i>Doctor Dashboard</h1>
+                <p class="text-muted mb-0">Welcome, {{ session.get('doctor_name') }}</p>
+            </div>
+            <a href="{{ url_for('doctor_patients') }}" class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-people me-1"></i>View All Patients
+            </a>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-warning-soft mb-2"><i class="bi bi-hourglass-split text-warning"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.pending }}</h3>
+                    <small class="text-muted">Pending</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-info-soft mb-2"><i class="bi bi-chat-dots text-info"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.active }}</h3>
+                    <small class="text-muted">Active</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-success-soft mb-2"><i class="bi bi-check-circle text-success"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.completed }}</h3>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-primary-soft mb-2"><i class="bi bi-clipboard2-pulse text-primary"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.total }}</h3>
+                    <small class="text-muted">Total</small>
+                </div>
+            </div>
+        </div>
+
+        {% if pending %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-3"><i class="bi bi-hourglass-split text-warning me-2"></i>Pending Consultations</h3>
+            {% for c in pending %}
+            <div class="glass-card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div>
+                        <span class="badge bg-warning text-dark mb-1">Pending</span>
+                        <h5 class="fw-semibold mb-1">Patient: {{ c['username'] }}</h5>
+                        <small class="text-muted">{{ c['created_at'] }}</small>
+                    </div>
+                </div>
+                <div class="p-3 rounded-3 bg-light mb-3">
+                    <p class="mb-0"><strong>Question:</strong> {{ c['question'] }}</p>
+                </div>
+                <form method="POST" action="{{ url_for('doctor_respond') }}" class="d-inline">
+                    <input type="hidden" name="consult_id" value="{{ c['id'] }}">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                        <i class="bi bi-check-lg me-1"></i>Approve & Accept
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if active %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-3"><i class="bi bi-chat-dots text-info me-2"></i>Active Consultations</h3>
+            {% for c in active %}
+            <div class="glass-card p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div>
+                        <span class="badge bg-info">Active</span>
+                        <h5 class="fw-semibold mb-1">Patient: {{ c['username'] }}</h5>
+                        <small class="text-muted">{{ c['created_at'] }}</small>
+                    </div>
+                </div>
+                <div class="p-3 rounded-3 bg-light mb-3">
+                    <p class="mb-0"><strong>Question:</strong> {{ c['question'] }}</p>
+                </div>
+                <form method="POST" action="{{ url_for('doctor_respond') }}">
+                    <input type="hidden" name="consult_id" value="{{ c['id'] }}">
+                    <input type="hidden" name="action" value="respond">
+                    <div class="mb-3">
+                        <textarea name="response" class="form-control" rows="4" placeholder="Write your medical advice and response here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 me-2">
+                        <i class="bi bi-send me-1"></i>Send Response
+                    </button>
+                    <button type="submit" name="action" value="complete" class="btn btn-outline-success rounded-pill px-4">
+                        <i class="bi bi-check-circle me-1"></i>Mark Complete
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if completed %}
+        <div>
+            <h3 class="fw-bold mb-3"><i class="bi bi-check-circle text-success me-2"></i>Completed Consultations</h3>
+            <div class="table-responsive">
+                <table class="table table-hover glass-table">
+                    <thead>
+                        <tr><th>Patient</th><th>Question</th><th>Response</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in completed %}
+                        <tr>
+                            <td class="fw-medium">{{ c['username'] }}</td>
+                            <td>{{ c['question'][:80] }}{% if c['question']|length > 80 %}...{% endif %}</td>
+                            <td>{{ (c['doctor_response'] or 'N/A')[:80] }}{% if (c['doctor_response'] or '')|length > 80 %}...{% endif %}</td>
+                            <td class="text-muted small">{{ c['created_at'][:10] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not pending and not active and not completed %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted mb-3 d-block"></i>
+            <h4 class="text-muted">No consultations yet</h4>
+            <p class="text-muted">Consultations from patients will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

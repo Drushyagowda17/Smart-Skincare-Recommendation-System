@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block title %}Home — Smart Skincare Quiz{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-7">
+                <div class="hero-badge mb-3 animate-fade-in">
+                    <span class="badge bg-accent-soft text-dark px-3 py-2 rounded-pill">
+                        <i class="bi bi-stars me-1"></i> Science-Backed Skincare
+                    </span>
+                </div>
+                <h1 class="hero-title display-3 fw-800 mb-4 animate-fade-in" style="animation-delay:0.1s">
+                    Your Skin Deserves<br>
+                    <span class="text-gradient">Personalized Care</span>
+                </h1>
+                <p class="hero-subtitle lead mb-4 animate-fade-in" style="animation-delay:0.2s">
+                    Take our smart skin quiz and get customized AM &amp; PM routines,
+                    product recommendations, and expert advice — all tailored to your unique skin profile.
+                </p>
+                <div class="hero-actions d-flex gap-3 flex-wrap animate-fade-in" style="animation-delay:0.3s">
+                    <a href="#quiz" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg">
+                        <i class="bi bi-clipboard2-pulse me-2"></i>Take the Quiz
+                    </a>
+                    <a href="{{ url_for('ingredient_decoder') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-search me-2"></i>Decode Ingredients
+                    </a>
+                </div>
+                <div class="hero-stats d-flex gap-4 mt-5 animate-fade-in" style="animation-delay:0.4s">
+                    <div class="stat-item">
+                        <span class="stat-number h3 fw-bold mb-0">{{ product_count }}+</span>
+                        <span class="stat-label small text-muted">Products</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number h3 fw-bold mb-0">18</span>
+                        <span class="stat-label small text-muted">Routines</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number h3 fw-bold mb-0">{{ doctor_count }}</span>
+                        <span class="stat-label small text-muted">Doctors</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number h3 fw-bold mb-0">50+</span>
+                        <span class="stat-label small text-muted">Ingredients</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="hero-visual">
+                    <div class="hero-glow"></div>
+                    <div class="hero-card glass-card p-4 text-center">
+                        <div class="hero-icon-large mb-3">
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Smart Skin Analysis</h4>
+                        <p class="text-muted small mb-3">10-question quiz powered by dermatological rules</p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <span class="badge bg-primary-soft">Oily</span>
+                            <span class="badge bg-primary-soft">Dry</span>
+                            <span class="badge bg-primary-soft">Combination</span>
+                            <span class="badge bg-primary-soft">Sensitive</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-strip py-4">
+    <div class="container">
+        <div class="row g-3 justify-content-center">
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="#quiz" class="feature-chip">
+                    <i class="bi bi-clipboard2-pulse"></i><span>Skin Quiz</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('ingredient_decoder') }}" class="feature-chip">
+                    <i class="bi bi-search"></i><span>Ingredients</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('routine_builder') }}" class="feature-chip">
+                    <i class="bi bi-calendar3"></i><span>Builder</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('compare') }}" class="feature-chip">
+                    <i class="bi bi-arrow-left-right"></i><span>Compare</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('myths') }}" class="feature-chip">
+                    <i class="bi bi-lightbulb"></i><span>Myths</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('consult') if session.get('user_id') else url_for('login') }}" class="feature-chip">
+                    <i class="bi bi-chat-dots"></i><span>Consult</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="quiz-section py-5" id="quiz">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-stars me-1"></i> Personalized Analysis</span>
+            <h2 class="section-title display-5 fw-bold mt-3">Smart Skin Quiz</h2>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Answer 10 questions and we'll build your perfect AM &amp; PM skincare routine with product recommendations.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <form action="{{ url_for('recommend') }}" method="POST" class="quiz-form glass-card p-4 p-lg-5" id="skinQuizForm">
+                    <div class="quiz-progress mb-4">
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar bg-gradient-primary" id="quizProgressBar" style="width:10%"></div>
+                        </div>
+                        <span class="small text-muted mt-1 d-block" id="quizStepLabel">Question 1 of 10</span>
+                    </div>
+
+                    <div class="quiz-step active" data-step="1">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-droplet me-2 text-primary"></i>What is your skin type?</h4>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="skin_type" value="oily" required>
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-moisture fs-2 text-primary mb-2 d-block"></i>
+                                        <strong>Oily</strong>
+                                        <small class="d-block text-muted">Shiny T-zone, visible pores</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="skin_type" value="dry">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-wind fs-2 text-primary mb-2 d-block"></i>
+                                        <strong>Dry</strong>
+                                        <small class="d-block text-muted">Tight, flaky, rough patches</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="skin_type" value="combination">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-yin-yang fs-2 text-primary mb-2 d-block"></i>
+                                        <strong>Combination</strong>
+                                        <small class="d-block text-muted">Oily T-zone, dry cheeks</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="skin_type" value="all">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-check-circle fs-2 text-primary mb-2 d-block"></i>
+                                        <strong>Normal</strong>
+                                        <small class="d-block text-muted">Balanced, no major issues</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="2">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-bullseye me-2 text-primary"></i>What's your primary skin concern?</h4>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="acne" required>
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-emoji-frown fs-2 text-danger mb-2 d-block"></i>
+                                        <strong>Acne</strong>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="dark_spots">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-circle-fill fs-2 text-warning mb-2 d-block"></i>
+                                        <strong>Dark Spots</strong>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="dullness">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-brightness-low fs-2 text-secondary mb-2 d-block"></i>
+                                        <strong>Dullness</strong>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="dryness">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-droplet fs-2 text-info mb-2 d-block"></i>
+                                        <strong>Dryness</strong>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="anti_aging">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-hourglass-split fs-2 text-purple mb-2 d-block"></i>
+                                        <strong>Anti-Aging</strong>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="quiz-option-card">
+                                    <input type="radio" name="concern" value="sensitivity">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi bi-shield-exclamation fs-2 text-success mb-2 d-block"></i>
+                                        <strong>Sensitivity</strong>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="3">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-person me-2 text-primary"></i>What's your age?</h4>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3"><label class="quiz-option-card"><input type="radio" name="age" value="18" required><div class="card-body text-center p-3"><strong>Under 20</strong></div></label></div>
+                            <div class="col-6 col-md-3"><label class="quiz-option-card"><input type="radio" name="age" value="25"><div class="card-body text-center p-3"><strong>20–30</strong></div></label></div>
+                            <div class="col-6 col-md-3"><label class="quiz-option-card"><input type="radio" name="age" value="35"><div class="card-body text-center p-3"><strong>30–40</strong></div></label></div>
+                            <div class="col-6 col-md-3"><label class="quiz-option-card"><input type="radio" name="age" value="50"><div class="card-body text-center p-3"><strong>40+</strong></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="4">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-gender-ambiguous me-2 text-primary"></i>What's your gender?</h4>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="gender" value="female" required><div class="card-body text-center p-3"><i class="bi bi-gender-female fs-2 mb-2 d-block"></i><strong>Female</strong></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="gender" value="male"><div class="card-body text-center p-3"><i class="bi bi-gender-male fs-2 mb-2 d-block"></i><strong>Male</strong></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="gender" value="other"><div class="card-body text-center p-3"><i class="bi bi-gender-neuter fs-2 mb-2 d-block"></i><strong>Other</strong></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="5">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-geo-alt me-2 text-primary"></i>Which city do you live in?</h4>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="bengaluru" required><div class="card-body text-center p-3"><strong>Bengaluru</strong><small class="d-block text-muted">Moderate</small></div></label></div>
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="delhi"><div class="card-body text-center p-3"><strong>Delhi</strong><small class="d-block text-muted">Extreme + Pollution</small></div></label></div>
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="mumbai"><div class="card-body text-center p-3"><strong>Mumbai</strong><small class="d-block text-muted">Hot & Humid</small></div></label></div>
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="hyderabad"><div class="card-body text-center p-3"><strong>Hyderabad</strong><small class="d-block text-muted">Hot & Semi-arid</small></div></label></div>
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="chennai"><div class="card-body text-center p-3"><strong>Chennai</strong><small class="d-block text-muted">Hot & Humid</small></div></label></div>
+                            <div class="col-6 col-md-4"><label class="quiz-option-card"><input type="radio" name="city" value="kolkata"><div class="card-body text-center p-3"><strong>Kolkata</strong><small class="d-block text-muted">Tropical Wet</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="6">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-wallet2 me-2 text-primary"></i>What's your monthly skincare budget?</h4>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="budget" value="low" required><div class="card-body text-center p-3"><i class="bi bi-cash fs-2 text-success mb-2 d-block"></i><strong>Budget</strong><small class="d-block text-muted">Under ₹500</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="budget" value="medium"><div class="card-body text-center p-3"><i class="bi bi-cash-stack fs-2 text-warning mb-2 d-block"></i><strong>Mid-Range</strong><small class="d-block text-muted">₹500–₹1000</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="budget" value="high"><div class="card-body text-center p-3"><i class="bi bi-gem fs-2 text-primary mb-2 d-block"></i><strong>Premium</strong><small class="d-block text-muted">₹1000+</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="7">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-cup-straw me-2 text-primary"></i>How many glasses of water do you drink daily?</h4>
+                        <div class="row g-3">
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="water" value="4" required><div class="card-body text-center p-3"><strong>1–4</strong><small class="d-block text-muted">Low</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="water" value="6"><div class="card-body text-center p-3"><strong>5–7</strong><small class="d-block text-muted">Moderate</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="water" value="8"><div class="card-body text-center p-3"><strong>8–10</strong><small class="d-block text-muted">Good</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="water" value="12"><div class="card-body text-center p-3"><strong>10+</strong><small class="d-block text-muted">Excellent</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="8">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-moon-stars me-2 text-primary"></i>How many hours do you sleep?</h4>
+                        <div class="row g-3">
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="sleep" value="4" required><div class="card-body text-center p-3"><strong>&lt;5 hrs</strong><small class="d-block text-muted">Poor</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="sleep" value="6"><div class="card-body text-center p-3"><strong>5–6 hrs</strong><small class="d-block text-muted">Low</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="sleep" value="7"><div class="card-body text-center p-3"><strong>7–8 hrs</strong><small class="d-block text-muted">Good</small></div></label></div>
+                            <div class="col-3"><label class="quiz-option-card"><input type="radio" name="sleep" value="9"><div class="card-body text-center p-3"><strong>8+ hrs</strong><small class="d-block text-muted">Great</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="9">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-shield-check me-2 text-primary"></i>Is your skin sensitive to new products?</h4>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="sensitivity" value="yes" required><div class="card-body text-center p-3"><i class="bi bi-emoji-frown fs-2 text-danger mb-2 d-block"></i><strong>Yes</strong><small class="d-block text-muted">Often react</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="sensitivity" value="sometimes"><div class="card-body text-center p-3"><i class="bi bi-emoji-neutral fs-2 text-warning mb-2 d-block"></i><strong>Sometimes</strong><small class="d-block text-muted">Occasionally</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="sensitivity" value="no"><div class="card-body text-center p-3"><i class="bi bi-emoji-smile fs-2 text-success mb-2 d-block"></i><strong>No</strong><small class="d-block text-muted">Rarely react</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-step="10">
+                        <h4 class="quiz-question mb-4"><i class="bi bi-bar-chart me-2 text-primary"></i>What's your skincare experience level?</h4>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="routine_level" value="beginner" required><div class="card-body text-center p-3"><i class="bi bi-1-circle fs-2 text-success mb-2 d-block"></i><strong>Beginner</strong><small class="d-block text-muted">Just starting</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="routine_level" value="intermediate"><div class="card-body text-center p-3"><i class="bi bi-2-circle fs-2 text-warning mb-2 d-block"></i><strong>Intermediate</strong><small class="d-block text-muted">Know basics</small></div></label></div>
+                            <div class="col-4"><label class="quiz-option-card"><input type="radio" name="routine_level" value="advanced"><div class="card-body text-center p-3"><i class="bi bi-3-circle fs-2 text-primary mb-2 d-block"></i><strong>Advanced</strong><small class="d-block text-muted">Skincare pro</small></div></label></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-navigation d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="quizPrev" style="display:none;">
+                            <i class="bi bi-arrow-left me-1"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 ms-auto" id="quizNext">
+                            Next <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 ms-auto shadow-lg" id="quizSubmit" style="display:none;">
+                            <i class="bi bi-magic me-2"></i>Get My Routine
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" id="featured">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-heart me-1"></i> Curated Selection</span>
+            <h2 class="section-title fw-bold mt-3">Featured Products</h2>
+        </div>
+        <div class="row g-4">
+            {% for product in featured_products %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="product-card glass-card h-100">
+                    <div class="product-category-badge">{{ product['category'] | title }}</div>
+                    <div class="product-card-body p-4">
+                        <h5 class="product-name fw-semibold mb-2">{{ product['name'] }}</h5>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-primary-soft">{{ product['skin_type'] | title }}</span>
+                            <span class="badge bg-accent-soft text-dark">{{ product['concern'].replace('_',' ') | title }}</span>
+                        </div>
+                        <p class="product-price h5 fw-bold text-primary mb-2">{{ format_price(product['price']) }}</p>
+                        <p class="product-ingredients small text-muted mb-0" title="{{ product['ingredients'] }}">
+                            <i class="bi bi-list-ul me-1"></i>{{ product['ingredients'][:80] }}{% if product['ingredients']|length > 80 %}...{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="cta-card glass-card p-5 text-center">
+            <h2 class="fw-bold mb-3">Ready to Transform Your Skin?</h2>
+            <p class="text-muted mb-4 mx-auto" style="max-width:500px;">Join thousands who've discovered their perfect skincare routine through our science-backed recommendations.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                {% if not session.get('user_id') %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                    <i class="bi bi-person-plus me-2"></i>Create Free Account
+                </a>
+                {% endif %}
+                <a href="#quiz" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                    <i class="bi bi-clipboard2-pulse me-2"></i>Take the Quiz
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initQuiz();
+});
+</script>
+{% endblock %}

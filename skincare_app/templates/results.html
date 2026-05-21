@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Your Personalized Routine{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-magic me-1"></i> Your Results</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Your Personalized Skincare Routine</h1>
+            <p class="text-muted">Based on your quiz answers, here's your customized routine</p>
+        </div>
+
+        <div class="row g-3 mb-5 justify-content-center">
+            <div class="col-auto"><span class="badge bg-primary-soft fs-6 px-3 py-2"><i class="bi bi-droplet me-1"></i>{{ get_skin_type_label(skin_type) }}</span></div>
+            <div class="col-auto"><span class="badge bg-accent-soft text-dark fs-6 px-3 py-2"><i class="bi bi-bullseye me-1"></i>{{ get_concern_label(concern) }}</span></div>
+            <div class="col-auto"><span class="badge bg-success-soft fs-6 px-3 py-2"><i class="bi bi-wallet2 me-1"></i>{{ budget | title }} Budget</span></div>
+            <div class="col-auto"><span class="badge bg-info-soft fs-6 px-3 py-2"><i class="bi bi-geo-alt me-1"></i>{{ city | title }}</span></div>
+        </div>
+
+        {% if result.warnings %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="alert alert-warning border-0 shadow-sm rounded-4">
+                    <h5 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Important Notes</h5>
+                    <ul class="mb-0">
+                        {% for w in result.warnings %}
+                        <li>{{ w }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="routine-card glass-card h-100">
+                    <div class="routine-header morning-header p-4">
+                        <h3 class="fw-bold mb-0"><i class="bi bi-brightness-high me-2"></i>Morning Routine (AM)</h3>
+                    </div>
+                    <div class="routine-body p-4">
+                        {% for step in result.morning %}
+                        <div class="routine-step d-flex align-items-start mb-3">
+                            <div class="step-number me-3">{{ step.step }}</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="badge bg-primary-soft mb-1">{{ step.type }}</span>
+                                        <p class="mb-0 fw-medium">{{ step.desc }}</p>
+                                    </div>
+                                    {% if step.wait != '0 min' %}
+                                    <span class="badge bg-warning text-dark ms-2 flex-shrink-0"><i class="bi bi-clock me-1"></i>Wait {{ step.wait }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="routine-card glass-card h-100">
+                    <div class="routine-header night-header p-4">
+                        <h3 class="fw-bold mb-0"><i class="bi bi-moon-stars me-2"></i>Night Routine (PM)</h3>
+                    </div>
+                    <div class="routine-body p-4">
+                        {% for step in result.night %}
+                        <div class="routine-step d-flex align-items-start mb-3">
+                            <div class="step-number me-3">{{ step.step }}</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="badge bg-primary-soft mb-1">{{ step.type }}</span>
+                                        <p class="mb-0 fw-medium">{{ step.desc }}</p>
+                                    </div>
+                                    {% if step.wait != '0 min' %}
+                                    <span class="badge bg-warning text-dark ms-2 flex-shrink-0"><i class="bi bi-clock me-1"></i>Wait {{ step.wait }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if result.climate %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="glass-card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-cloud-sun me-2 text-primary"></i>Climate Tips for {{ city | title }}</h4>
+                    <div class="d-flex gap-3 mb-3">
+                        <span class="badge bg-info-soft fs-6 px-3 py-2">Climate: {{ result.climate.climate }}</span>
+                        <span class="badge bg-primary-soft fs-6 px-3 py-2">Humidity: {{ result.climate.humidity }}</span>
+                    </div>
+                    <ul class="list-unstyled">
+                        {% for tip in result.climate.tips %}
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i>{{ tip }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="glass-card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i>Pro Tips</h4>
+                    <div class="row g-3">
+                        {% for tip in result.tips %}
+                        <div class="col-md-6">
+                            <div class="tip-card p-3 rounded-3">
+                                <i class="bi bi-star-fill text-warning me-2"></i>{{ tip }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if all_products %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4"><i class="bi bi-bag-heart me-2 text-primary"></i>Recommended Products</h3>
+            <div class="row g-4">
+                {% for product in all_products %}
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="product-card glass-card h-100">
+                        <div class="product-category-badge">{{ product['category'] | title }}</div>
+                        <div class="product-card-body p-4">
+                            <h5 class="product-name fw-semibold mb-2">{{ product['name'] }}</h5>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary-soft">{{ product['skin_type'] | title }}</span>
+                                <span class="badge bg-accent-soft text-dark">{{ product['concern'].replace('_',' ') | title }}</span>
+                            </div>
+                            <p class="product-price h5 fw-bold text-primary mb-2">{{ format_price(product['price']) }}</p>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rating-stars me-2">
+                                    {% set avg = product['avg_rating'] | float %}
+                                    {% for i in range(1, 6) %}
+                                    <i class="bi bi-star{% if i <= avg %}-fill text-warning{% elif i - 0.5 <= avg %}-half text-warning{% else %} text-muted{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted">({{ product['rating_count'] }})</small>
+                            </div>
+                            <p class="small text-muted mb-3">{{ product['ingredients'][:100] }}{% if product['ingredients']|length > 100 %}...{% endif %}</p>
+                            {% if session.get('user_id') %}
+                            <div class="rating-input" data-product-id="{{ product['id'] }}">
+                                <small class="text-muted d-block mb-1">Rate this product:</small>
+                                <div class="star-rating-input">
+                                    {% for i in range(1, 6) %}
+                                    <i class="bi bi-star rate-star" data-rating="{{ i }}" onclick="rateProduct({{ product['id'] }}, {{ i }})"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if session.get('user_id') %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="glass-card p-4 text-center">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-bookmark-heart me-2 text-primary"></i>Save This Routine</h4>
+                    <p class="text-muted mb-4">Save your personalized routine so you can access it anytime.</p>
+                    <form action="{{ url_for('save_routine') }}" method="POST">
+                        <input type="hidden" name="skin_type" value="{{ skin_type }}">
+                        <input type="hidden" name="concern" value="{{ concern }}">
+                        <input type="hidden" name="budget" value="{{ budget }}">
+                        <input type="hidden" name="morning_routine" value="{% for s in result.morning %}Step {{ s.step }}: {{ s.type }} - {{ s.desc }} (Wait: {{ s.wait }})&#10;{% endfor %}">
+                        <input type="hidden" name="night_routine" value="{% for s in result.night %}Step {{ s.step }}: {{ s.type }} - {{ s.desc }} (Wait: {{ s.wait }})&#10;{% endfor %}">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">
+                            <i class="bi bi-bookmark-plus me-2"></i>Save My Routine
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="glass-card p-4 text-center">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-lock me-2"></i>Want to Save This Routine?</h4>
+                    <p class="text-muted mb-4">Create a free account to save routines, rate products, consult doctors, and track your progress.</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                        <i class="bi bi-person-plus me-2"></i>Sign Up Free
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center">
+            <a href="{{ url_for('index') }}#quiz" class="btn btn-outline-primary rounded-pill px-4 me-2">
+                <i class="bi bi-arrow-repeat me-1"></i>Retake Quiz
+            </a>
+            <a href="{{ url_for('ingredient_decoder') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-search me-1"></i>Decode Ingredients
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

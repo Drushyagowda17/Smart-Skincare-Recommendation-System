@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Skin Diary{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-journal-text me-1"></i> Daily Tracking</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Skin Diary</h1>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Track your daily habits and skin condition to discover patterns and optimize your routine.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="glass-card p-4 sticky-top" style="top:100px;">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2 text-primary"></i>New Entry</h4>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-moon me-1"></i>Sleep Hours</label>
+                            <input type="number" name="sleep_hours" class="form-control" min="0" max="24" step="0.5" value="7" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-cup-straw me-1"></i>Water Intake (glasses)</label>
+                            <input type="number" name="water_intake" class="form-control" min="0" max="20" step="0.5" value="8" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-emoji-neutral me-1"></i>Stress Level (1-10)</label>
+                            <input type="range" name="stress_level" class="form-range" min="1" max="10" value="5" id="stressRange" oninput="document.getElementById('stressVal').textContent=this.value">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-success">Low</small>
+                                <strong id="stressVal">5</strong>
+                                <small class="text-danger">High</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-egg-fried me-1"></i>Diet Today</label>
+                            <select name="diet" class="form-select" required>
+                                <option value="healthy">Healthy (fruits, veggies, lean protein)</option>
+                                <option value="moderate">Moderate (mixed)</option>
+                                <option value="unhealthy">Unhealthy (fast food, sugar, processed)</option>
+                                <option value="dairy_heavy">Dairy Heavy</option>
+                                <option value="sugar_heavy">Sugar Heavy</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-droplet me-1"></i>Skin Status</label>
+                            <select name="skin_status" class="form-select" required>
+                                <option value="great">Great — Clear and glowing</option>
+                                <option value="good">Good — Minor issues</option>
+                                <option value="okay">Okay — Some breakouts/dryness</option>
+                                <option value="bad">Bad — Significant issues</option>
+                                <option value="terrible">Terrible — Major flare-up</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="bi bi-pencil me-1"></i>Notes</label>
+                            <textarea name="notes" class="form-control" rows="2" placeholder="Any observations..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary rounded-pill w-100">
+                            <i class="bi bi-journal-plus me-2"></i>Add Entry
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                {% if entries %}
+                <div class="glass-card p-4 mb-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>Your Trends</h4>
+                    <canvas id="diaryChart" height="250"></canvas>
+                </div>
+
+                <h4 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Entries</h4>
+                {% for entry in entries %}
+                <div class="glass-card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ entry['created_at'][:10] if entry['created_at'] else '' }}</small>
+                        <span class="badge bg-{{ 'success' if entry['skin_status'] in ['great', 'good'] else 'warning text-dark' if entry['skin_status'] == 'okay' else 'danger' }}">
+                            {{ entry['skin_status'] | title }}
+                        </span>
+                    </div>
+                    <div class="row g-2 small">
+                        <div class="col-3"><i class="bi bi-moon me-1 text-primary"></i>{{ entry['sleep_hours'] }}h sleep</div>
+                        <div class="col-3"><i class="bi bi-cup-straw me-1 text-info"></i>{{ entry['water_intake'] }} glasses</div>
+                        <div class="col-3"><i class="bi bi-emoji-neutral me-1 text-warning"></i>Stress: {{ entry['stress_level'] }}/10</div>
+                        <div class="col-3"><i class="bi bi-egg-fried me-1 text-success"></i>{{ entry['diet'] | title }}</div>
+                    </div>
+                    {% if entry['notes'] %}
+                    <p class="small text-muted mt-2 mb-0"><i class="bi bi-chat-left-text me-1"></i>{{ entry['notes'] }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5 glass-card">
+                    <i class="bi bi-journal display-1 text-muted mb-3 d-block"></i>
+                    <h4 class="text-muted">No entries yet</h4>
+                    <p class="text-muted">Start tracking today to discover patterns in your skin health.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% if entries %}
+<script>
+fetch('/api/diary-data')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var ctx = document.getElementById('diaryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    { label: 'Sleep (hrs)', data: data.sleep, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', tension: 0.4, fill: true },
+                    { label: 'Water (glasses)', data: data.water, borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.1)', tension: 0.4, fill: true },
+                    { label: 'Stress (1-10)', data: data.stress, borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.1)', tension: 0.4, fill: true }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

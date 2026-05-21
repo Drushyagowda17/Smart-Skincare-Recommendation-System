@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Consult a Doctor{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-chat-dots me-1"></i> Expert Advice</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Consult a Dermatologist</h1>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Submit your skincare questions and get expert advice from qualified dermatologists.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="glass-card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-send me-2 text-primary"></i>Ask a Question</h4>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Choose a Doctor (optional)</label>
+                            <select name="doctor_id" class="form-select">
+                                <option value="">Any available doctor</option>
+                                {% for doc in doctors %}
+                                <option value="{{ doc['id'] }}">{{ doc['name'] }} — {{ doc['specialization'] }} ({{ doc['experience'] }} yrs)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Your Question</label>
+                            <textarea name="question" class="form-control" rows="5" placeholder="Describe your skin concern in detail..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary rounded-pill w-100">
+                            <i class="bi bi-send me-2"></i>Submit Question
+                        </button>
+                    </form>
+                </div>
+
+                <div class="glass-card p-4 mt-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-people me-2 text-info"></i>Our Doctors</h5>
+                    {% for doc in doctors %}
+                    <div class="d-flex align-items-center mb-3 p-2 rounded-3 bg-light">
+                        <div class="avatar-md bg-info-soft me-3"><i class="bi bi-heart-pulse text-info"></i></div>
+                        <div>
+                            <h6 class="fw-semibold mb-0">{{ doc['name'] }}</h6>
+                            <small class="text-muted">{{ doc['specialization'] }} • {{ doc['experience'] }} years</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <h4 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Your Consultations</h4>
+                {% if consultations %}
+                {% for c in consultations %}
+                <div class="glass-card p-4 mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-{{ 'warning text-dark' if c['status'] == 'pending' else 'info' if c['status'] == 'approved' else 'success' }}">
+                            {{ c['status'] | title }}
+                        </span>
+                        <small class="text-muted">{{ c['created_at'][:10] if c['created_at'] else '' }}</small>
+                    </div>
+                    <p class="fw-medium mb-2"><i class="bi bi-chat-left-text me-1"></i>{{ c['question'] }}</p>
+                    {% if c['doctor_name'] %}
+                    <small class="text-muted"><i class="bi bi-heart-pulse me-1"></i>Doctor: {{ c['doctor_name'] }}</small>
+                    {% endif %}
+                    {% if c['doctor_response'] %}
+                    <div class="p-3 rounded-3 bg-success bg-opacity-10 mt-2">
+                        <h6 class="fw-semibold text-success"><i class="bi bi-check-circle me-1"></i>Doctor's Response:</h6>
+                        <p class="mb-0">{{ c['doctor_response'] }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5 glass-card">
+                    <i class="bi bi-chat-dots display-1 text-muted mb-3 d-block"></i>
+                    <h4 class="text-muted">No consultations yet</h4>
+                    <p class="text-muted">Submit your first question to get expert skincare advice.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

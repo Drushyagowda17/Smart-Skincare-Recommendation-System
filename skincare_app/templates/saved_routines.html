@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Saved Routines{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-bookmark-heart me-1"></i> Your Collection</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Saved Routines</h1>
+        </div>
+
+        {% if routines %}
+        <div class="row g-4">
+            {% for routine in routines %}
+            <div class="col-lg-6">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-primary-soft me-1">{{ get_skin_type_label(routine['skin_type']) }}</span>
+                            <span class="badge bg-accent-soft text-dark">{{ get_concern_label(routine['concern']) }}</span>
+                            <span class="badge bg-success-soft">{{ routine['budget'] | title }}</span>
+                        </div>
+                        <small class="text-muted">{{ routine['created_at'][:10] if routine['created_at'] else '' }}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5 class="fw-semibold"><i class="bi bi-brightness-high text-warning me-1"></i>Morning</h5>
+                        <div class="p-3 rounded-3 bg-warning bg-opacity-10">
+                            <pre class="mb-0 small" style="white-space:pre-wrap;font-family:inherit;">{{ routine['morning_routine'] }}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h5 class="fw-semibold"><i class="bi bi-moon-stars text-primary me-1"></i>Night</h5>
+                        <div class="p-3 rounded-3 bg-primary bg-opacity-10">
+                            <pre class="mb-0 small" style="white-space:pre-wrap;font-family:inherit;">{{ routine['night_routine'] }}</pre>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('delete_routine', routine_id=routine['id']) }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this routine?')">
+                            <i class="bi bi-trash me-1"></i>Delete Routine
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-bookmark display-1 text-muted mb-3 d-block"></i>
+            <h4 class="text-muted">No saved routines yet</h4>
+            <p class="text-muted mb-4">Take the quiz and save your personalized routine.</p>
+            <a href="{{ url_for('index') }}#quiz" class="btn btn-primary rounded-pill px-5"><i class="bi bi-clipboard2-pulse me-2"></i>Take the Quiz</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

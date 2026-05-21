@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="fw-bold mb-4"><i class="bi bi-speedometer2 me-2 text-primary"></i>Admin Dashboard</h1>
+
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-primary-soft mb-2"><i class="bi bi-bag text-primary"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.total_products }}</h3>
+                    <small class="text-muted">Products</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-success-soft mb-2"><i class="bi bi-people text-success"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.total_users }}</h3>
+                    <small class="text-muted">Users</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-info-soft mb-2"><i class="bi bi-heart-pulse text-info"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.total_doctors }}</h3>
+                    <small class="text-muted">Doctors</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card glass-card p-4 text-center">
+                    <div class="stat-icon bg-warning-soft mb-2"><i class="bi bi-chat-dots text-warning"></i></div>
+                    <h3 class="fw-bold mb-0">{{ stats.total_consultations }}</h3>
+                    <small class="text-muted">Consultations</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-lg-3">
+                <div class="glass-card p-3 text-center">
+                    <h5 class="fw-bold text-warning mb-0">{{ stats.pending_consultations }}</h5>
+                    <small class="text-muted">Pending Consults</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="glass-card p-3 text-center">
+                    <h5 class="fw-bold text-primary mb-0">{{ stats.total_ratings }}</h5>
+                    <small class="text-muted">Ratings</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="glass-card p-3 text-center">
+                    <h5 class="fw-bold text-success mb-0">{{ stats.total_routines }}</h5>
+                    <small class="text-muted">Saved Routines</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="glass-card p-3 text-center">
+                    <h5 class="fw-bold text-info mb-0">{{ stats.total_diary_entries }}</h5>
+                    <small class="text-muted">Diary Entries</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3">Products by Category</h5>
+                    <canvas id="categoryChart" height="250"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3">Products by Concern</h5>
+                    <canvas id="concernChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-4 mb-5">
+            <h4 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2 text-primary"></i>Add New Product</h4>
+            <form method="POST" action="{{ url_for('add_product') }}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Product Name</label>
+                        <input type="text" name="name" class="form-control" required placeholder="Product name">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Category</label>
+                        <select name="category" class="form-select" required>
+                            <option value="cleanser">Cleanser</option>
+                            <option value="toner">Toner</option>
+                            <option value="serum">Serum</option>
+                            <option value="moisturizer">Moisturizer</option>
+                            <option value="sunscreen">Sunscreen</option>
+                            <option value="exfoliant">Exfoliant</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Price (₹)</label>
+                        <input type="number" name="price" class="form-control" required min="50" max="5000" step="10" placeholder="500">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Skin Type</label>
+                        <select name="skin_type" class="form-select" required>
+                            <option value="all">All</option>
+                            <option value="oily">Oily</option>
+                            <option value="dry">Dry</option>
+                            <option value="combination">Combination</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Concern</label>
+                        <select name="concern" class="form-select" required>
+                            <option value="acne">Acne</option>
+                            <option value="dark_spots">Dark Spots</option>
+                            <option value="dullness">Dullness</option>
+                            <option value="dryness">Dryness</option>
+                            <option value="anti_aging">Anti-Aging</option>
+                            <option value="sensitivity">Sensitivity</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Ingredients</label>
+                        <input type="text" name="ingredients" class="form-control" required placeholder="Ingredient 1, Ingredient 2...">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary rounded-pill px-5">
+                            <i class="bi bi-plus-lg me-2"></i>Add Product
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="glass-card p-4 mb-5">
+            <h4 class="fw-bold mb-3"><i class="bi bi-bag me-2 text-primary"></i>All Products ({{ products | length }})</h4>
+            <div class="table-responsive">
+                <table class="table table-hover glass-table small">
+                    <thead>
+                        <tr><th>Name</th><th>Category</th><th>Price</th><th>Skin Type</th><th>Concern</th><th>Rating</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for p in products %}
+                        <tr>
+                            <td class="fw-medium">{{ p['name'] }}</td>
+                            <td><span class="badge bg-primary-soft">{{ p['category'] | title }}</span></td>
+                            <td class="text-primary fw-bold">{{ format_price(p['price']) }}</td>
+                            <td>{{ p['skin_type'] | title }}</td>
+                            <td>{{ p['concern'].replace('_',' ') | title }}</td>
+                            <td>
+                                {% set avg = p['avg_rating'] | float %}
+                                {{ "%.1f" | format(avg) }}/5
+                                <small class="text-muted">({{ p['rating_count'] }})</small>
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('delete_product', product_id=p['id']) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-people me-2 text-success"></i>Users ({{ users | length }})</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover glass-table small">
+                            <thead><tr><th>Username</th><th>Email</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td class="fw-medium">{{ u['username'] }}</td>
+                                    <td class="text-muted">{{ u['email'] }}</td>
+                                    <td class="text-muted">{{ u['created_at'][:10] if u['created_at'] else '' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-heart-pulse me-2 text-info"></i>Doctors ({{ doctors | length }})</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover glass-table small">
+                            <thead><tr><th>Name</th><th>Specialization</th><th>Exp</th></tr></thead>
+                            <tbody>
+                                {% for d in doctors %}
+                                <tr>
+                                    <td class="fw-medium">{{ d['name'] }}</td>
+                                    <td>{{ d['specialization'] }}</td>
+                                    <td>{{ d['experience'] }} yrs</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if consultations %}
+        <div class="glass-card p-4 mb-5">
+            <h4 class="fw-bold mb-3"><i class="bi bi-chat-dots me-2 text-warning"></i>Recent Consultations</h4>
+            <div class="table-responsive">
+                <table class="table table-hover glass-table small">
+                    <thead><tr><th>Patient</th><th>Doctor</th><th>Status</th><th>Question</th><th>Date</th></tr></thead>
+                    <tbody>
+                        {% for c in consultations %}
+                        <tr>
+                            <td class="fw-medium">{{ c['username'] }}</td>
+                            <td>{{ c['doctor_name'] or 'Unassigned' }}</td>
+                            <td><span class="badge bg-{{ 'warning text-dark' if c['status'] == 'pending' else 'info' if c['status'] == 'approved' else 'success' }}">{{ c['status'] | title }}</span></td>
+                            <td>{{ c['question'][:60] }}{% if c['question']|length > 60 %}...{% endif %}</td>
+                            <td class="text-muted">{{ c['created_at'][:10] if c['created_at'] else '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var catData = {{ stats.category_counts | tojson }};
+    var conData = {{ stats.concern_counts | tojson }};
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(catData).map(function(k) { return k.charAt(0).toUpperCase() + k.slice(1); }),
+            datasets: [{
+                data: Object.values(catData),
+                backgroundColor: ['#4CAF91', '#6366f1', '#f43f5e', '#f59e0b', '#06b6d4', '#8b5cf6'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    new Chart(document.getElementById('concernChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(conData).map(function(k) { return k.replace('_', ' ').charAt(0).toUpperCase() + k.replace('_', ' ').slice(1); }),
+            datasets: [{
+                label: 'Products',
+                data: Object.values(conData),
+                backgroundColor: ['#4CAF91', '#6366f1', '#f43f5e', '#f59e0b', '#06b6d4', '#8b5cf6'],
+                borderRadius: 8,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Error {{ error_code }}{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <span class="display-1 fw-bold text-primary">{{ error_code }}</span>
+            </div>
+            <h2 class="fw-bold mb-3">{{ error_message }}</h2>
+            <p class="text-muted mb-4">Something went wrong. Let's get you back on track.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-5">
+                    <i class="bi bi-house me-2"></i>Go Home
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-secondary rounded-pill px-5">
+                    <i class="bi bi-arrow-left me-2"></i>Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

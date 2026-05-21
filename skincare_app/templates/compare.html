@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Compare Products{% endblock %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-arrow-left-right me-1"></i> Side by Side</span>
+            <h1 class="section-title display-5 fw-bold mt-3">Product Comparison</h1>
+            <p class="section-subtitle text-muted mx-auto" style="max-width:600px;">Select 2-3 products to compare their price, rating, ingredients, and suitability.</p>
+        </div>
+
+        <form method="POST" class="glass-card p-4 mb-5">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-9">
+                    <label class="form-label fw-medium">Select Products to Compare (2-3)</label>
+                    <select name="product_ids" class="form-select" multiple size="6" id="compareSelect">
+                        {% for product in products %}
+                        <option value="{{ product['id'] }}">{{ product['name'] }} — {{ product['category'] | title }} — {{ format_price(product['price']) }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Hold Ctrl/Cmd to select multiple products</small>
+                </div>
+                <div class="col-lg-3">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 py-2">
+                        <i class="bi bi-arrow-left-right me-2"></i>Compare
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if selected %}
+        <div class="glass-card p-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-table me-2 text-primary"></i>Comparison Results</h3>
+            <div class="table-responsive">
+                <table class="table table-hover glass-table text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Feature</th>
+                            {% for p in selected %}
+                            <th>{{ p['name'] }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-start fw-medium">Category</td>
+                            {% for p in selected %}
+                            <td><span class="badge bg-primary-soft">{{ p['category'] | title }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="text-start fw-medium">Price</td>
+                            {% for p in selected %}
+                            <td class="fw-bold text-primary">{{ format_price(p['price']) }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="text-start fw-medium">Skin Type</td>
+                            {% for p in selected %}
+                            <td><span class="badge bg-info-soft">{{ p['skin_type'] | title }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="text-start fw-medium">Concern</td>
+                            {% for p in selected %}
+                            <td><span class="badge bg-accent-soft text-dark">{{ p['concern'].replace('_', ' ') | title }}</span></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="text-start fw-medium">Rating</td>
+                            {% for p in selected %}
+                            <td>
+                                <div class="d-inline-flex align-items-center">
+                                    {% set avg = p['avg_rating'] | float %}
+                                    {% for i in range(1, 6) %}
+                                    <i class="bi bi-star{% if i <= avg %}-fill text-warning{% else %} text-muted{% endif %} small"></i>
+                                    {% endfor %}
+                                    <span class="ms-1 small">({{ p['rating_count'] }})</span>
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="text-start fw-medium">Ingredients</td>
+                            {% for p in selected %}
+                            <td class="small text-start">{{ p['ingredients'] }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {% if selected | length >= 2 %}
+            <div class="mt-4 p-3 rounded-3 bg-primary bg-opacity-10">
+                <h5 class="fw-bold"><i class="bi bi-lightbulb me-2 text-warning"></i>Quick Analysis</h5>
+                {% set prices = [] %}
+                {% for p in selected %}{% if prices.append(p['price']) %}{% endif %}{% endfor %}
+                <p class="mb-1"><strong>Best Value:</strong> {{ selected | sort(attribute='price') | first | attr('name') }} at {{ format_price(selected | sort(attribute='price') | first | attr('price')) }}</p>
+                <p class="mb-1"><strong>Highest Rated:</strong> {{ selected | sort(attribute='avg_rating', reverse=True) | first | attr('name') }} ({{ "%.1f" | format(selected | sort(attribute='avg_rating', reverse=True) | first | attr('avg_rating')) }}/5)</p>
+                <p class="mb-0"><strong>Price Difference:</strong> {{ format_price((selected | sort(attribute='price', reverse=True) | first | attr('price')) - (selected | sort(attribute='price') | first | attr('price'))) }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
