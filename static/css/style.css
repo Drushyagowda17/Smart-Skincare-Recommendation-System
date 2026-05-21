@@ -671,6 +671,13 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
 [data-theme="dark"] .form-control, [data-theme="dark"] .form-select { background: #1a2420; color: var(--text); border-color: var(--glass-border); }
 [data-theme="dark"] .input-group-text { background: #1a2420; color: var(--text-muted); border-color: var(--glass-border); }
 [data-theme="dark"] .table { --bs-table-bg: transparent; color: var(--text); }
+[data-theme="dark"] .glass-table thead th {
+    background: rgba(76, 175, 145, 0.15) !important;
+    color: #6ee7b7 !important;
+}
+[data-theme="dark"] .glass-table tbody tr:hover {
+    background: rgba(76, 175, 145, 0.12) !important;
+}
 [data-theme="dark"] .bg-white { background: var(--card-bg) !important; color: var(--text) !important; }
 [data-theme="dark"] .text-dark { color: var(--text) !important; }
 [data-theme="dark"] .quiz-option-card .card-body { background: var(--card-bg); }
