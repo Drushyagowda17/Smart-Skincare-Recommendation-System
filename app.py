@@ -641,6 +641,61 @@ def delete_product(product_id):
     return redirect(url_for('admin'))
 
 
+@app.route('/admin/add_doctor', methods=['POST'])
+@admin_required
+def add_doctor():
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    password = request.form.get('password', '')
+    specialization = request.form.get('specialization', '').strip()
+    experience_raw = request.form.get('experience', '')
+
+    if not all([name, email, password, specialization, experience_raw]):
+        flash('All fields are required.', 'danger')
+        return redirect(url_for('admin'))
+
+    try:
+        experience = int(experience_raw)
+        if experience < 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        flash('Experience must be a non-negative number.', 'danger')
+        return redirect(url_for('admin'))
+
+    if len(password) < 6:
+        flash('Password must be at least 6 characters.', 'danger')
+        return redirect(url_for('admin'))
+
+    db = get_db()
+    existing = db.execute("SELECT id FROM doctors WHERE email = ?", (email,)).fetchone()
+    if existing:
+        flash('Email already registered for a doctor.', 'danger')
+        db.close()
+        return redirect(url_for('admin'))
+
+    db.execute(
+        "INSERT INTO doctors (name, email, password_hash, specialization, experience) VALUES (?, ?, ?, ?, ?)",
+        (name, email, generate_password_hash(password), specialization, experience)
+    )
+    db.commit()
+    db.close()
+
+    flash(f'Doctor account for "{name}" created successfully!', 'success')
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/delete_doctor/<int:doctor_id>', methods=['POST'])
+@admin_required
+def delete_doctor(doctor_id):
+    db = get_db()
+    db.execute("UPDATE consultations SET doctor_id = NULL WHERE doctor_id = ?", (doctor_id,))
+    db.execute("DELETE FROM doctors WHERE id = ?", (doctor_id,))
+    db.commit()
+    db.close()
+    flash('Doctor deleted.', 'info')
+    return redirect(url_for('admin'))
+
+
 @app.route('/api/diary-data')
 @login_required
 def diary_data():
