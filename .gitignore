@@ -1,4 +1,4 @@
-# Python environment
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,16 +8,14 @@ ENV/
 env/
 .env
 
-# Databases
-skincare_app/*.db
-skincare_app/*.db-journal
-skincare_app/*.db-wal
+*.db
+*.db-journal
+*.db-wal
 
-# Uploads
-skincare_app/static/uploads/progress/*
-!skincare_app/static/uploads/progress/.gitkeep
 
-# IDEs & System files
+static/uploads/progress/*
+!static/uploads/progress/.gitkeep
+
 .vscode/
 .idea/
 .DS_Store

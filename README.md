@@ -1,6 +1,5 @@
 # GlowGuide — Smart Skincare Recommendation System
 
-[![Repository URL](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/Drushyagowda17/Smart-Skincare-Recommendation-System.git)
 
 A fully functional offline skincare platform built with Flask, SQLite, and vanilla JavaScript.
 
