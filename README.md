@@ -1,4 +1,4 @@
-# GlowGuide — Smart Skincare Recommendation System
+# GlowGuide - Smart Skincare Recommendation System
 
 
 A fully functional offline skincare platform built with Flask, SQLite, and vanilla JavaScript.
