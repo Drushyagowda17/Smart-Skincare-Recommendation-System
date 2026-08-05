@@ -7,7 +7,7 @@ A fully functional offline skincare platform built with Flask, SQLite, and vanil
 To clone or download this repository:
 ```bash
 git clone https://github.com/Drushyagowda17/Smart-Skincare-Recommendation-System.git
-cd Smart-Skincare-Recommendation-System/skincare_app
+cd Smart-Skincare-Recommendation-System
 ```
 
 
